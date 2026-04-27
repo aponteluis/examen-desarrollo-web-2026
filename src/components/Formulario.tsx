@@ -2,22 +2,52 @@ import { useForm } from 'react-hook-form'
 import { usePacienteStore } from '../store/store'
 import type { DraftPatient } from '../types'
 import Error from './Error'
+import { useEffect } from 'react'
+import { toast } from 'sonner'
+
+const defaultValues: DraftPatient = {
+    name: '',
+    caretaker: '',
+    email: '',
+    date: '',
+    symptoms: ''
+}
 
 const Formulario = () => {
     const agregarPaciente = usePacienteStore((state) => state.agregarPaciente)
+    const actualizarPaciente = usePacienteStore((state) => state.actualizarPaciente)
+    const pacienteActivoId = usePacienteStore((state) => state.pacienteActivoId)
+    const pacienteActivo = usePacienteStore((state) => state.pacientes.find((paciente) => paciente.id === pacienteActivoId))
+
     const { register, handleSubmit, reset, formState: { errors } } = useForm<DraftPatient>({
-        defaultValues: {
-            name: '',
-            caretaker: '',
-            email: '',
-            date: '',
-            symptoms: ''
-        }
+        defaultValues
     })
 
+    useEffect(() => {
+        if (pacienteActivo) {
+            reset({
+                name: pacienteActivo.name,
+                caretaker: pacienteActivo.caretaker,
+                email: pacienteActivo.email,
+                date: pacienteActivo.date,
+                symptoms: pacienteActivo.symptoms
+            })
+            return
+        }
+
+        reset(defaultValues)
+    }, [pacienteActivo, reset])
+
     const registrarPaciente = (data: DraftPatient) => {
+        if (pacienteActivo) {
+            actualizarPaciente({ id: pacienteActivo.id, ...data })
+            toast.success(`Paciente ${data.name} actualizado correctamente`)
+            reset(defaultValues)
+            return
+        }
+
         agregarPaciente(data)
-        reset()
+        reset(defaultValues)
     }
 
     return (
@@ -86,7 +116,7 @@ const Formulario = () => {
                 type="submit"
                 className="bg-indigo-600 text-white py-2 px-6 rounded-md font-bold uppercase w-full hover:bg-indigo-700 transition-colors"
             >
-                Guardar Paciente
+                {pacienteActivo ? 'Guardar Cambios' : 'Guardar Paciente'}
             </button>
         </form>
     )

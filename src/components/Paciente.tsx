@@ -17,6 +17,7 @@ const Paciente = ({ paciente }: PacienteProps) => {
     };
 
     const eliminarPaciente = usePacienteStore((state) => state.eliminarPaciente)
+    const setPacienteActivo = usePacienteStore((state) => state.setPacienteActivo)
 
     const handleClickEliminar = () => {
         eliminarPaciente(paciente.id)
@@ -36,7 +37,7 @@ const Paciente = ({ paciente }: PacienteProps) => {
                 <button
                     type="button"
                     className="py-2 px-10 bg-indigo-600 hover:bg-indigo-700 text-white font-bold uppercase rounded-lg"
-                    onClick={() => console.log(paciente.id)}
+                    onClick={() => setPacienteActivo(paciente.id)}
                 >Editar</button>
 
                 <button
