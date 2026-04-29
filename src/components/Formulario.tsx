@@ -1,124 +1,214 @@
-import { useForm } from 'react-hook-form'
-import { usePacienteStore } from '../store/store'
-import type { DraftPatient } from '../types'
-import Error from './Error'
 import { useEffect } from 'react'
-import { toast } from 'sonner'
+import { useForm } from 'react-hook-form'
+import Error from './Error'
+import type { DraftUser } from '../types'
+import { useMusicStore } from '../store/store'
 
-const defaultValues: DraftPatient = {
-    name: '',
-    caretaker: '',
-    email: '',
-    date: '',
-    symptoms: ''
-}
+const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i
 
 const Formulario = () => {
-    const agregarPaciente = usePacienteStore((state) => state.agregarPaciente)
-    const actualizarPaciente = usePacienteStore((state) => state.actualizarPaciente)
-    const pacienteActivoId = usePacienteStore((state) => state.pacienteActivoId)
-    const pacienteActivo = usePacienteStore((state) => state.pacientes.find((paciente) => paciente.id === pacienteActivoId))
+    const user = useMusicStore((state) => state.user)
+    const setUser = useMusicStore((state) => state.setUser)
+    const updateUser = useMusicStore((state) => state.updateUser)
+    const clearUser = useMusicStore((state) => state.clearUser)
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<DraftPatient>({
-        defaultValues
-    })
+    const { register, handleSubmit, formState: { errors }, setValue, reset } = useForm<DraftUser>()
 
     useEffect(() => {
-        if (pacienteActivo) {
-            reset({
-                name: pacienteActivo.name,
-                caretaker: pacienteActivo.caretaker,
-                email: pacienteActivo.email,
-                date: pacienteActivo.date,
-                symptoms: pacienteActivo.symptoms
-            })
-            return
+        if (user) {
+            setValue('name', user.name)
+            setValue('email', user.email)
+            setValue('age', user.age)
+            setValue('country', user.country)
+            setValue('favoriteGenre', user.favoriteGenre)
         }
+    }, [user, setValue])
 
-        reset(defaultValues)
-    }, [pacienteActivo, reset])
-
-    const registrarPaciente = (data: DraftPatient) => {
-        if (pacienteActivo) {
-            actualizarPaciente({ id: pacienteActivo.id, ...data })
-            toast.success(`Paciente ${data.name} actualizado correctamente`)
-            reset(defaultValues)
-            return
+    const handleRegistro = (data: DraftUser) => {
+        if (user) {
+            updateUser(data)
+        } else {
+            const newUser = {
+                id: crypto.randomUUID(),
+                ...data,
+                createdAt: new Date().toISOString()
+            }
+            setUser(newUser)
         }
+        reset()
+    }
 
-        agregarPaciente(data)
-        reset(defaultValues)
+    const handleCancelar = () => {
+        clearUser()
+        reset()
+    }
+
+    const inputClasses = "w-full p-3 bg-zinc-900 text-zinc-100 rounded focus:outline-none focus:border-emerald-500 transition-colors"
+    const labelClasses = "text-sm uppercase font-bold text-zinc-300 block mb-2"
+
+    if (!user) {
+        return (
+            <div className="w-full">
+                <h2 className="font-black text-3xl text-center text-zinc-100">QVL</h2>
+                <p className="text-lg mt-3 text-center mb-8 text-zinc-400">
+                    Regístrate para comenzar a escuchar
+                </p>
+
+                <form
+                    className="rounded-lg py-8 px-6"
+                    noValidate
+                    onSubmit={handleSubmit(handleRegistro)}
+                >
+                    <div className="mb-5">
+                        <label htmlFor="name" className={labelClasses}>Nombre Completo</label>
+                        <input
+                            id="name"
+                            className={inputClasses}
+                            type="text"
+                            placeholder="Ej. Juan Pérez"
+                            {...register('name', {
+                                required: "El nombre es obligatorio",
+                                minLength: { value: 3, message: "Mínimo 3 caracteres" }
+                            })}
+                        />
+                        {errors.name && <Error>{errors.name?.message?.toString()}</Error>}
+                    </div>
+
+                    <div className="mb-5">
+                        <label htmlFor="email" className={labelClasses}>Email</label>
+                        <input
+                            id="email"
+                            className={inputClasses}
+                            type="email"
+                            placeholder="tu@email.com"
+                            {...register('email', {
+                                required: "El email es obligatorio",
+                                validate: (value) => emailRegex.test(value) || "Email inválido"
+                            })}
+                        />
+                        {errors.email && <Error>{errors.email?.message?.toString()}</Error>}
+                    </div>
+
+                    <div className="mb-5">
+                        <label htmlFor="age" className={labelClasses}>Edad</label>
+                        <input
+                            id="age"
+                            className={inputClasses}
+                            type="number"
+                            placeholder="18"
+                            {...register('age', {
+                                required: "La edad es obligatoria",
+                                min: { value: 13, message: "Debes tener al menos 13 años" },
+                                max: { value: 120, message: "Edad inválida" }
+                            })}
+                        />
+                        {errors.age && <Error>{errors.age?.message?.toString()}</Error>}
+                    </div>
+
+                    <div className="mb-5">
+                        <label htmlFor="country" className={labelClasses}>País</label>
+                        <input
+                            id="country"
+                            className={inputClasses}
+                            type="text"
+                            placeholder="México"
+                            {...register('country', {
+                                required: "El país es obligatorio"
+                            })}
+                        />
+                        {errors.country && <Error>{errors.country?.message?.toString()}</Error>}
+                    </div>
+
+                    <div className="mb-8">
+                        <label htmlFor="genre" className={labelClasses}>Género Favorito</label>
+                        <select
+                            id="genre"
+                            className={inputClasses}
+                            {...register('favoriteGenre', {
+                                required: "Selecciona un género"
+                            })}
+                        >
+                            <option value="">-- Selecciona un género --</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Soul">Soul</option>
+                            <option value="Synthwave">Synthwave</option>
+                            <option value="Indie">Indie</option>
+                            <option value="Disco Pop">Disco Pop</option>
+                        </select>
+                        {errors.favoriteGenre && <Error>{errors.favoriteGenre?.message?.toString()}</Error>}
+                    </div>
+
+                    <input
+                        type="submit"
+                        value="Registrarse"
+                        className="w-full bg-zinc-600 text-zinc-900 p-3 uppercase font-bold rounded hover:bg-zinc-500 cursor-pointer transition-colors"
+                    />
+                </form>
+            </div>
+        )
     }
 
     return (
-        <form
-            onSubmit={handleSubmit(registrarPaciente)}
-            className="md:w-1/2 lg:w-2/5 bg-white shadow-md rounded-lg p-8 space-y-4"
-        >
-            <input
-                type="text"
-                placeholder="Nombre del Paciente"
-                className="border-2 w-full p-2 placeholder-gray-400 rounded-md"
-                {...register('name', {
-                    required: "El nombre es obligatorio"
-                })}
-            />
+        <div className="rounded-lg p-6">
+            <h3 className="text-xl font-bold mb-4 text-zinc-100">Editar Perfil</h3>
 
-            {errors.name && <Error>{errors.name.message}</Error>}
+            <form noValidate onSubmit={handleSubmit(handleRegistro)}>
+                <div className="mb-4">
+                    <label htmlFor="name" className={labelClasses}>Nombre Completo</label>
+                    <input id="name" className={inputClasses} type="text" {...register('name', { required: "Obligatorio", minLength: { value: 3, message: "Mínimo 3 caracteres" } })} />
+                    {errors.name && <Error>{errors.name?.message?.toString()}</Error>}
+                </div>
 
-            <input
-                type="text"
-                placeholder="Nombre del Propietario"
-                className="border-2 w-full p-2 placeholder-gray-400 rounded-md"
-                {...register('caretaker', {
-                    required: "El nombre del propietario es obligatorio"
-                })}
-            />
+                <div className="mb-4">
+                    <label htmlFor="email" className={labelClasses}>Email</label>
+                    <input id="email" className={inputClasses} type="email" {...register('email', { required: "Obligatorio", validate: (value) => emailRegex.test(value) || "Inválido" })} />
+                    {errors.email && <Error>{errors.email?.message?.toString()}</Error>}
+                </div>
 
-            {errors.caretaker && <Error>{errors.caretaker.message}</Error>}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label htmlFor="age" className={labelClasses}>Edad</label>
+                        <input id="age" className={inputClasses} type="number" {...register('age', { required: "Obligatorio", min: { value: 13, message: "Mín. 13" } })} />
+                        {errors.age && <Error>{errors.age?.message?.toString()}</Error>}
+                    </div>
+                    <div>
+                        <label htmlFor="country" className={labelClasses}>País</label>
+                        <input id="country" className={inputClasses} type="text" {...register('country', { required: "Obligatorio" })} />
+                        {errors.country && <Error>{errors.country?.message?.toString()}</Error>}
+                    </div>
+                </div>
 
-            <input
-                type="email"
-                placeholder="Email de contacto"
-                className="border-2 w-full p-2 placeholder-gray-400 rounded-md"
-                {...register('email', {
-                    required: "El email es obligatorio",
-                    pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: 'Email no válido'
-                    }
-                })}
-            />
+                <div className="mb-6">
+                    <label htmlFor="genre" className={labelClasses}>Género Favorito</label>
+                    <select id="genre" className={inputClasses} {...register('favoriteGenre', { required: "Obligatorio" })}>
+                        <option value="Pop">Pop</option>
+                        <option value="Rock">Rock</option>
+                        <option value="Jazz">Jazz</option>
+                        <option value="Soul">Soul</option>
+                        <option value="Synthwave">Synthwave</option>
+                        <option value="Indie">Indie</option>
+                        <option value="Disco Pop">Disco Pop</option>
+                    </select>
+                </div>
 
-            {errors.email && <Error>{errors.email.message}</Error>}
-
-            <input
-                type="date"
-                className="border-2 w-full p-2 placeholder-gray-400 rounded-md"
-                {...register('date', {
-                    required: "La fecha de alta es obligatoria"
-                })}
-            />
-
-            {errors.date && <Error>{errors.date.message}</Error>}
-
-            <textarea
-                placeholder="Síntomas del paciente"
-                className="border-2 w-full p-2 placeholder-gray-400 rounded-md h-32"
-                {...register('symptoms', {
-                    required: "Los síntomas son obligatorios"
-                })}
-            />
-
-            {errors.symptoms && <Error>{errors.symptoms.message}</Error>}
-
-            <button
-                type="submit"
-                className="bg-indigo-600 text-white py-2 px-6 rounded-md font-bold uppercase w-full hover:bg-indigo-700 transition-colors"
-            >
-                {pacienteActivo ? 'Guardar Cambios' : 'Guardar Paciente'}
-            </button>
-        </form>
+                <div className="flex flex-col gap-3">
+                    <input
+                        type="submit"
+                        value="Guardar Cambios"
+                        className="w-full bg-zinc-700 text-white p-3 uppercase font-bold rounded hover:bg-zinc-600 cursor-pointer border border-zinc-600 transition-colors"
+                    />
+                    <button
+                        type="button"
+                        onClick={handleCancelar}
+                        className="w-full bg-red-900/50 text-red-400 border border-red-900/50 p-3 uppercase font-bold rounded hover:bg-red-900 cursor-pointer transition-colors"
+                    >
+                        Cerrar Sesión
+                    </button>
+                </div>
+            </form>
+        </div>
     )
 }
 

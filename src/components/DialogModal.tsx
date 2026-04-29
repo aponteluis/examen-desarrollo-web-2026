@@ -47,29 +47,27 @@ const DialogModal = ({
     <dialog
       ref={ref}
       onCancel={onClose}
-      onClick={(e) =>
+      onClick={(e:any) =>
         ref.current && !isClickInsideRectangle(e, ref.current) && onClose()
       }
-      className="fixed inset-0 m-auto h-fit w-[calc(100%-2rem)] max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl backdrop:bg-black/40"
+      className="w-[400px] rounded-lg border-gray-400 p-6 backdrop:bg-black/30"
     >
-      <h3 className="mb-4 text-xl font-semibold text-slate-800">{title}</h3>
+      <h3 className="text-xl font-bold mb-4">{title}</h3>
 
-      <div className="mb-6 text-slate-600">{children}</div>
+      <div className="mb-6">{children}</div>
 
-      <div className="flex gap-3">
-        <button
-          type="button"
+      <div className="flex gap-5">
+        <button 
           onClick={proceedAndClose}
-          className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
-          Si, eliminar
+          Proceed
         </button>
-        <button
-          type="button"
+        <button 
           onClick={onClose}
-          className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
+          className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition-colors"
         >
-          Cancelar
+          Close
         </button>
       </div>
     </dialog>
