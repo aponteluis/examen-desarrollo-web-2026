@@ -10,7 +10,7 @@ const DocumentGenerator = ({ user, playlists }: DocumentGeneratorProps) => {
     const [selectedFormat, setSelectedFormat] = useState<DocumentFormat | ''>('')
     const [selectedPlaylist, setSelectedPlaylist] = useState<string>('')
 
-    const generateCSV = () => { /* La misma lógica que ya tenías */
+    const generateCSV = () => {
         if (!selectedPlaylist) { alert('Selecciona una playlist'); return; }
         const playlist = playlists.find(p => p.id === selectedPlaylist)
         if (!playlist) return
@@ -26,7 +26,7 @@ const DocumentGenerator = ({ user, playlists }: DocumentGeneratorProps) => {
         downloadFile(csvContent, `playlist_${playlist.name}.csv`, 'text/csv')
     }
 
-    const generateJSON = () => { /* La misma lógica que ya tenías */
+    const generateJSON = () => {
         if (!user) return
         const data = {
             usuario: { id: user.id, nombre: user.name, email: user.email, edad: user.age, país: user.country, géneroFavorito: user.favoriteGenre, fechaRegistro: new Date(user.createdAt).toLocaleDateString() },

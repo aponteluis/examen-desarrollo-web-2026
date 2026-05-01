@@ -10,7 +10,6 @@ import SubscriptionModal from './components/SubscriptionModal'
 import { useMusicStore } from './store/store'
 
 function App() {
-    // Estados de UI
     const [showAboutMe, setShowAboutMe] = useState(false)
     const [showSubs, setShowSubs] = useState(false)
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)

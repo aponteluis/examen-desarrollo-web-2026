@@ -67,7 +67,7 @@ export const useMusicStore = create<MusicStoreState>()(
                             duration: Math.floor(track.trackTimeMillis / 1000), 
                             genre: track.primaryGenreName,
                             year: new Date(track.releaseDate).getFullYear(),
-                            previewUrl: track.previewUrl, // El audio real de 30s
+                            previewUrl: track.previewUrl,
                             coverUrl: track.artworkUrl100.replace('100x100bb', '300x300bb') 
                         }));
                         set({ allSongs: mappedSongs, isLoadingSongs: false });
